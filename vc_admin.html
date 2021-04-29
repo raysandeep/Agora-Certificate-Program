@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Document</title>
+		<link rel="stylesheet" href="./styles/vcdemo.css" />
+		<link
+			rel="stylesheet"
+			href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css"
+			integrity="sha384-B0vP5xmATw1+K9KRQjQERJvTumQW0nPEzvF6L/Z6nronJ3oUOFUFpCjEUQouq2+l"
+			crossorigin="anonymous"
+		/>
+
+		<link
+			rel="stylesheet"
+			href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.2/css/all.min.css"
+			crossorigin="anonymous"
+		/>
+	</head>
+
+	<body onload="startEvent(1);">
+		<div class="app">
+			<main class="c-main">
+				<aside>
+					<img
+						class="c-logo"
+						src="https://is3-ssl.mzstatic.com/image/thumb/Purple124/v4/18/6e/66/186e661a-6076-0a79-0102-de408f346a7e/source/512x512bb.jpg"
+					/>
+				</aside>
+
+				<div class="c-video">
+					<header>
+						<h1>Introduction to Agora Web</h1>
+					</header>
+					<div class="c-video-information">
+						<div class="c-video-invited">
+							<div class="c-video-invited__attendees">
+								Network Quality: <span>6</span>
+							</div>
+						</div>
+					</div>
+
+					<div class="c-webcam">
+						<div id="vc" class="c-webcam-container">
+							<div class="c-webcam-organisor">
+								<img src="https://i.pravatar.cc/50?img=5" />
+								<div>
+									<!-- <span>Publisher</span> -->
+									<p>Kate Smith</p>
+								</div>
+							</div>
+
+							<div class="c-webcam-inchat" id="remote-playerlist">
+								<div id="local-player" class="player"></div>
+							</div>
+
+							<div class="c-webcam__video-controls">
+								<ul>
+									<li>
+										<button
+											class="c-control"
+											onclick="fullscreen(this);"
+										>
+											<i
+												class="fas fa-expand-arrows-alt"
+											></i>
+										</button>
+									</li>
+									<li>
+										<button class="c-control">
+											<i
+												class="fas fa-microphone-alt-slash"
+											></i>
+										</button>
+									</li>
+									<li>
+										<button
+											class="c-control--end-call c-join"
+										>
+											<i class="fas fa-phone"></i>
+										</button>
+									</li>
+									<li>
+										<button class="c-control">
+											<i class="fas fa-video"></i>
+										</button>
+									</li>
+									<li>
+										<button class="c-control">
+											<i class="fas fa-cog"></i>
+										</button>
+									</li>
+								</ul>
+							</div>
+
+							<div
+								class="c-webcam__video"
+								id="pinned-stream"
+							></div>
+						</div>
+					</div>
+				</div>
+
+				<div class="c-chat">
+					<div class="c-chat__window">
+						<header class="c-chat__info">
+							<div>
+								<button
+									onclick="showMessages(this);"
+									class="c-chat__tab c-chat__tab--active"
+									id="messages"
+								>
+									Messages
+								</button>
+								<button
+									onclick="showParticipants(this);"
+									id="participants"
+									class="c-chat__tab"
+								>
+									Participants
+								</button>
+								<button
+									onclick="showPolls(this);"
+									id="polls"
+									class="c-chat__tab"
+								>
+									Polls
+								</button>
+							</div>
+						</header>
+
+						<div
+							id="chats-pannel"
+							class="c-chat__conversation"
+							style="display: block"
+						>
+							<!-- <div class='c-user__chat '>
+                            <span>You</span>
+                            <p>Good evening, is this available?</p>
+                        </div>
+
+                        <div class='c-user__chat c-user__chat-other '>
+                            <span>Lubalin</span>
+                            <p>Yes it is</p>
+                        </div> -->
+
+							<div class="c-chat__inputs">
+								<input
+									id="text-message"
+									type="text"
+									placeholder="Write your message..."
+								/>
+								<button
+									class="c-chat__inputs-send"
+									aria-label="Send message"
+									onclick="sendMessage()"
+								>
+									<i
+										aria-hidden="true"
+										class="fas fa-paper-plane"
+									></i>
+								</button>
+							</div>
+						</div>
+
+						<div
+							id="participants-pannel"
+							class="c-chat__conversation"
+							style="display: none"
+						>
+							<ul class="list-group" id="users"></ul>
+							<!-- <h3>Hello</h3> -->
+						</div>
+
+						<div
+							id="polls-pannel"
+							class="c-chat__conversation"
+							style="display: none"
+						></div>
+					</div>
+				</div>
+			</main>
+		</div>
+		<script>
+			function showMessages(obj) {
+				document
+					.getElementById("participants")
+					.classList.remove("c-chat__tab--active");
+				document
+					.getElementById("polls")
+					.classList.remove("c-chat__tab--active");
+				obj.classList.add("c-chat__tab--active");
+				document.getElementById("polls-pannel").style.display = "none";
+				document.getElementById("participants-pannel").style.display =
+					"none";
+				document.getElementById("chats-pannel").style.display = "block";
+			}
+			function showParticipants(obj) {
+				document
+					.getElementById("messages")
+					.classList.remove("c-chat__tab--active");
+				document
+					.getElementById("polls")
+					.classList.remove("c-chat__tab--active");
+				obj.classList.add("c-chat__tab--active");
+
+				document.getElementById("polls-pannel").style.display = "none";
+				document.getElementById("participants-pannel").style.display =
+					"block";
+				document.getElementById("chats-pannel").style.display = "none";
+				populateUsers();
+			}
+			function showPolls(obj) {
+				document
+					.getElementById("participants")
+					.classList.remove("c-chat__tab--active");
+				document
+					.getElementById("messages")
+					.classList.remove("c-chat__tab--active");
+				obj.classList.add("c-chat__tab--active");
+				document.getElementById("polls-pannel").style.display = "block";
+				document.getElementById("participants-pannel").style.display =
+					"none";
+				document.getElementById("chats-pannel").style.display = "none";
+			}
+			function fullscreen(obj) {
+				console.log("toggling to full screen");
+				$("#vc").toggleClass("fullscreen");
+			}
+		</script>
+		<script
+			src="https://code.jquery.com/jquery-3.6.0.min.js"
+			integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4="
+			crossorigin="anonymous"
+		></script>
+		<script src="https://cdn.jsdelivr.net/npm/agora-rtm-sdk@1.3.1/index.js"></script>
+		<script src="https://download.agora.io/sdk/release/AgoraRTC_N.js"></script>
+		<script src="./scripts/main.js"></script>
+		<script src="./scripts/index.js"></script>
+	</body>
+</html>

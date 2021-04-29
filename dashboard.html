@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Dashboard</title>
+		<link
+			rel="stylesheet"
+			href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css"
+			integrity="sha384-B0vP5xmATw1+K9KRQjQERJvTumQW0nPEzvF6L/Z6nronJ3oUOFUFpCjEUQouq2+l"
+			crossorigin="anonymous"
+		/>
+		<link rel="stylesheet" href="styles/dashboard.css" />
+	</head>
+
+	<body onload="loadName()">
+		<div class="container-fluid">
+			<h1 class="mt-5">Agora Certificate Program</h1>
+			<p class="subtitle" id="name"></p>
+
+			<h3 class="mt-5">Available Courses</h3>
+			<div
+				id="available-courses"
+				class="scrolling-wrapper row flex-row flex-nowrap mt-4 pb-4 pt-2"
+			>
+				<h6 style="padding-left: 20px">No courses available!</h6>
+			</div>
+
+			<h3 class="mt-5">Registered Courses</h3>
+			<div
+				id="registered-courses"
+				class="scrolling-wrapper row flex-row flex-nowrap mt-4 pb-4 pt-2"
+			>
+				<h6 style="padding-left: 20px">
+					No registered courses available!
+				</h6>
+			</div>
+
+			<!-- <h3 class="mt-5">Agora Blogs</h3>
+        <div class="scrolling-wrapper row flex-row flex-nowrap mt-4 pb-4 pt-2">
+
+            <div class="col-3">
+                <div class="card card-block card-1">
+
+                </div>
+            </div>
+            <div class="col-3">
+                <div class="card card-block card-2"></div>
+            </div>
+            <div class="col-3">
+                <div class="card card-block card-3"></div>
+            </div>
+            <div class="col-3">
+                <div class="card card-block card-4"></div>
+            </div>
+        </div>
+ -->
+
+			<h3 class="mt-5">Agora News</h3>
+			<div
+				id="news"
+				class="scrolling-wrapper row flex-row flex-nowrap mt-4 pb-4 pt-2"
+			></div>
+		</div>
+
+		<script>
+			function logout() {
+				window.location.href = "signin.html";
+			}
+			function loadName() {
+				var name = localStorage.getItem("full_name");
+				if (name == null) {
+					logout();
+				}
+				console.log(name);
+				document.getElementById("name").innerHTML = `Hi ${name}!`;
+				loadNews();
+				loadCourses();
+				loadRegisteredCourses();
+			}
+
+			function loadNews() {
+				var myHeaders = new Headers();
+				myHeaders.append("Content-Type", "application/json");
+				myHeaders.append(
+					"Authorization",
+					`Token ${localStorage.getItem("token")}`
+				);
+
+				var requestOptions = {
+					method: "GET",
+					headers: myHeaders,
+					redirect: "follow",
+				};
+
+				fetch("http://127.0.0.1:8000/api/core/news/", requestOptions)
+					.then((response) => response.json())
+					.then((result) => {
+						console.log(result);
+						document.getElementById("news").innerHTML = "";
+
+						for (var i = 0; i < result.length; i++) {
+							document.getElementById(
+								"news"
+							).innerHTML += `<div class="col-3">
+                            <div class="card">
+                                <img class="card-img-top" src="${
+									result[i].url
+								}" alt="${result[i].title}">
+                                <div class="card-body">
+                                    <h5 class="card-title">${
+										result[i].title
+									}</h5>
+                                    <p class="card-text">${
+										result[i].description
+									}</p>
+                                    <p class="card-text"><small class="text-muted">${result[
+										i
+									].created_at.substr(0, 10)}</small></p>
+                                    <a href="${
+										result[i].links
+									}" class="btn btn-primary">Read More</a>
+                                </div>
+                            </div>
+                        </div>`;
+						}
+					})
+					.catch((error) => console.log("error", error));
+			}
+
+			function loadCourses() {
+				var myHeaders = new Headers();
+				myHeaders.append("Content-Type", "application/json");
+				myHeaders.append(
+					"Authorization",
+					`Token ${localStorage.getItem("token")}`
+				);
+
+				var requestOptions = {
+					method: "GET",
+					headers: myHeaders,
+					redirect: "follow",
+				};
+
+				fetch(
+					"http://127.0.0.1:8000/api/core/available/courses/",
+					requestOptions
+				)
+					.then((response) => response.json())
+					.then((result) => {
+						console.log(result);
+						if (result.length > 0)
+							document.getElementById(
+								"available-courses"
+							).innerHTML = "";
+						for (var i = 0; i < result.length; i++) {
+							document.getElementById(
+								"available-courses"
+							).innerHTML += `<div class="col-3">
+                            <div class="card">
+                                <img class="card-img-top" src="${
+									result[i].url
+								}" alt="${result[i].name}">
+                                <div class="card-body">
+                                    <h5 class="card-title">${
+										result[i].name
+									}</h5>
+                                    <p class="card-text">${
+										result[i].description
+									}</p>
+                                    <p class="card-text"><small class="text-muted">${result[
+										i
+									].start_date.substr(0, 10)}</small></p>
+                                    <button onclick=joinCourse('${
+										result[i].id
+									}') class="btn btn-primary">Join Course</button>
+                                </div>
+                            </div>
+                        </div>`;
+						}
+					})
+					.catch((error) => console.log("error", error));
+			}
+
+			function loadRegisteredCourses() {
+				var myHeaders = new Headers();
+				myHeaders.append("Content-Type", "application/json");
+				myHeaders.append(
+					"Authorization",
+					`Token ${localStorage.getItem("token")}`
+				);
+
+				var requestOptions = {
+					method: "GET",
+					headers: myHeaders,
+					redirect: "follow",
+				};
+
+				fetch(
+					"http://127.0.0.1:8000/api/core/registered/courses/",
+					requestOptions
+				)
+					.then((response) => response.json())
+					.then((result) => {
+						var userType = localStorage.getItem("user_type");
+						if (result.length > 0)
+							document.getElementById(
+								"registered-courses"
+							).innerHTML = "";
+						console.log(userType);
+						for (var i = 0; i < result.length; i++) {
+							if (userType == 1)
+								document.getElementById(
+									"registered-courses"
+								).innerHTML += `<div class="col-3">
+                                    <div class="card">
+                                        <img class="card-img-top" src="${
+											result[i].course.url
+										}" alt="${result[i].name}">
+                                        <div class="card-body">
+                                            <h5 class="card-title">${
+												result[i].course.name
+											}</h5>
+                                            <p class="card-text">${
+												result[i].course.description
+											}</p>
+                                            <p class="card-text"><small class="text-muted">${result[
+												i
+											].course.start_date.substr(
+												0,
+												10
+											)}-${result[
+									i
+								].course.end_date.substr(0, 10)}</small></p>
+                                            <a href="vc_admin.html?event_id=${
+												result[i].id
+											}" class="btn btn-primary">Join Session as Moderator</a>
+                                        </div>
+                                    </div>
+                                </div>`;
+							else if (!result[i].course.is_live)
+								document.getElementById(
+									"registered-courses"
+								).innerHTML += `<div class="col-3">
+                            <div class="card">
+                                <img class="card-img-top" src="${
+									result[i].course.url
+								}" alt="${result[i].name}">
+                                <div class="card-body">
+                                    <h5 class="card-title">${
+										result[i].course.name
+									}</h5>
+                                    <p class="card-text">${
+										result[i].course.description
+									}</p>
+                                    <p class="card-text"><small class="text-muted">${result[
+										i
+									].course.start_date.substr(
+										0,
+										10
+									)} to ${result[i].course.end_date.substr(
+									0,
+									10
+								)}</small></p>
+                                    
+                                </div>
+                            </div>
+                        </div>`;
+							else
+								document.getElementById(
+									"registered-courses"
+								).innerHTML += `<div class="col-3">
+                            <div class="card">
+                                <img class="card-img-top" src="${
+									result[i].course.url
+								}" alt="${result[i].name}">
+                                <div class="card-body">
+                                    <h5 class="card-title">${
+										result[i].course.name
+									}</h5>
+                                    <p class="card-text">${
+										result[i].course.description
+									}</p>
+                                    <p class="card-text"><small class="text-muted">${result[
+										i
+									].course.start_date.substr(0, 10)}-${result[
+									i
+								].course.end_date.substr(0, 10)}</small></p>
+                                    <a href="event.html?event_id=${
+										result[i].id
+									}" class="btn btn-primary">Join Session</a>
+                                </div>
+                            </div>
+                        </div>`;
+						}
+					})
+					.catch((error) => console.log("error", error));
+			}
+
+			function joinCourse(id) {
+				data = {
+					course: id,
+				};
+				var myHeaders = new Headers();
+				myHeaders.append("Content-Type", "application/json");
+				myHeaders.append(
+					"Authorization",
+					`Token ${localStorage.getItem("token")}`
+				);
+
+				var raw = JSON.stringify(data);
+
+				var requestOptions = {
+					method: "POST",
+					headers: myHeaders,
+					body: raw,
+					redirect: "follow",
+				};
+
+				fetch(
+					"http://127.0.0.1:8000/api/core/registered/courses/",
+					requestOptions
+				)
+					.then((response) => response.json())
+					.then((result) => {
+						window.location.reload();
+					})
+					.catch((error) => {
+						document.getElementById("alert").style = "display:show";
+						document.getElementById("alert").innerHTML =
+							"Invalid Credentials!";
+					});
+			}
+		</script>
+
+		<script
+			src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/js/bootstrap.bundle.min.js"
+			integrity="sha384-JEW9xMcG8R+pH31jmWH6WWP0WintQrMb4s7ZOdauHnUtxwoG2vI5DkLtS3qm9Ekf"
+			crossorigin="anonymous"
+		></script>
+		<script
+			src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.1/dist/umd/popper.min.js"
+			integrity="sha384-SR1sx49pcuLnqZUnnPwx6FCym0wLsk5JZuNx2bPPENzswTNFaQU1RDvt3wT4gWFG"
+			crossorigin="anonymous"
+		></script>
+		<script
+			src="https://code.jquery.com/jquery-3.6.0.min.js"
+			integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4="
+			crossorigin="anonymous"
+		></script>
+	</body>
+</html>
